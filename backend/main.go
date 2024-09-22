@@ -4,7 +4,9 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/my_ecommerce/controllers"
 	"github.com/my_ecommerce/internal/database"
+	"github.com/my_ecommerce/services"
 )
 
 func main() {
@@ -18,11 +20,13 @@ func main() {
 		log.Fatal("Error connecting database")
 	}
 
-	r.GET("/",func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "successfully connected to db",
-		})
-	})
+	// defining controllers and services
+	userServices := services.UserService{}
+	userController := controllers.UserController{}
 
+	userServices.InitUserService(db)
+	userController.InitUserController(r,userServices)
+
+	
 	r.Run(":8000")
 }
