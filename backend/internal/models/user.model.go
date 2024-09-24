@@ -1,4 +1,4 @@
-package internal
+package models
 
 type User struct {
 	ID       int    `gorm:"unique;primaryKey;autoIncrement" `

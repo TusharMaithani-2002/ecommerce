@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	// "github.com/golang-jwt/jwt/v5"
-	internal "github.com/my_ecommerce/internal/utils"
+	"github.com/my_ecommerce/internal/utils"
 	"github.com/my_ecommerce/services"
 )
 
@@ -79,7 +79,7 @@ func (u *UserController) registerUser() gin.HandlerFunc {
 			return
 		}
 
-		jwtToken, err := internal.GenerateJWT(user.Email)
+		jwtToken, err := utils.GenerateJWT(user.Email)
 
 		if err != nil {
 			c.JSON(http.StatusMethodNotAllowed,gin.H{
@@ -122,7 +122,7 @@ func (u *UserController) loginUser() gin.HandlerFunc {
 			return
 		}
 
-		jwtToken, err := internal.GenerateJWT(loggedInUser.Email)
+		jwtToken, err := utils.GenerateJWT(loggedInUser.Email)
 
 		if err != nil {
 			c.JSON(http.StatusMethodNotAllowed,gin.H{

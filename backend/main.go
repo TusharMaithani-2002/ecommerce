@@ -14,7 +14,7 @@ func main() {
 	r := gin.Default()
 
 	// initializing db
-	db := internal.InitDB()
+	db := database.InitDB()
 
 	if db == nil {
 		log.Fatal("Error connecting database")
