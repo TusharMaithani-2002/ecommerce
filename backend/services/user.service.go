@@ -36,7 +36,7 @@ func (u *UserService) GetUser(id int) (*dto.UserResponse, error) {
 	return userResponse, nil
 }
 
-func (u *UserService) CreateUser(name string, password string, email string, address string, role string) (*dto.UserResponse, error) {
+func (u *UserService) CreateUser(name , password , email , address , role string) (*dto.UserResponse, error) {
 
 	hassedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 

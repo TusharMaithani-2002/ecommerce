@@ -27,6 +27,11 @@ func main() {
 	userServices.InitUserService(db)
 	userController.InitUserController(r,userServices)
 
+	productServices := services.ProductService{}
+	productController := controllers.ProductController{}
+
+	productServices.InitProductService(db)
+	productController.InitProductController(r,productServices)
 	
 	r.Run(":8000")
 }
