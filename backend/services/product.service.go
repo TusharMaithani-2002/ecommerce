@@ -24,18 +24,19 @@ func (p *ProductService) InitProductService(database *gorm.DB) {
 func (p *ProductService) GetProduct(id int) (*dto.ProductReponse, error) {
 
 	var product models.Product
-	if err := p.db.Where("id = ?",id).First(&product).Error; err != nil {
+	if err := p.db.Where("id = ?", id).Preload("Seller").First(&product).Error; err != nil {
 		return nil, err
 	}
 
 	var imagesArray []string
 	json.Unmarshal(product.Images, &imagesArray)
 
-
 	sellerResponse := dto.UserResponse{
-		Name:  product.Seller.Name,
-		Email: product.Seller.Email,
-		ID:    product.Seller.ID,
+		Name:    product.Seller.Name,
+		Email:   product.Seller.Email,
+		ID:      product.Seller.ID,
+		Address: product.Seller.Address,
+		Role:    product.Seller.Role,
 	}
 
 	productResponse := &dto.ProductReponse{
@@ -68,14 +69,16 @@ func (p *ProductService) CreateProduct(name, description, category string, selle
 		CreatedAt:   time.Now(),
 	}
 
-	if err := p.db.Create(&product).Error; err != nil {
+	if err := p.db.Create(&product).Preload("Seller").Error; err != nil {
 		return nil, err
 	}
 
 	sellerResponse := dto.UserResponse{
-		Name:  product.Seller.Name,
-		Email: product.Seller.Email,
-		ID:    product.Seller.ID,
+		Name:    product.Seller.Name,
+		Email:   product.Seller.Email,
+		ID:      product.Seller.ID,
+		Address: product.Seller.Address,
+		Role:    product.Seller.Role,
 	}
 
 	var imagesArray []string
