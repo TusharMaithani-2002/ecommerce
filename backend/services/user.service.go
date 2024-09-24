@@ -18,13 +18,6 @@ func (user *UserService) InitUserService(database *gorm.DB) {
 	user.db.AutoMigrate(&models.User{})
 }
 
-type User struct {
-	ID      string
-	Name    string
-	Email   string
-	Address string
-}
-
 func (u *UserService) GetUser(id int) (*dto.UserResponse, error) {
 	var user *models.User
 
@@ -37,12 +30,13 @@ func (u *UserService) GetUser(id int) (*dto.UserResponse, error) {
 		Email:   user.Email,
 		Address: user.Address,
 		ID:      user.ID,
+		Role:    user.Role,
 	}
 
 	return userResponse, nil
 }
 
-func (u *UserService) CreateUser(name string, password string, email string, address string) (*dto.UserResponse, error) {
+func (u *UserService) CreateUser(name string, password string, email string, address string, role string) (*dto.UserResponse, error) {
 
 	hassedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
@@ -55,6 +49,7 @@ func (u *UserService) CreateUser(name string, password string, email string, add
 		Password: string(hassedPassword),
 		Email:    email,
 		Address:  address,
+		Role:     role,
 	}
 
 	if err := u.db.Create(user).Error; err != nil {
@@ -66,6 +61,7 @@ func (u *UserService) CreateUser(name string, password string, email string, add
 		Email:   user.Email,
 		Address: user.Address,
 		ID:      user.ID,
+		Role:    user.Role,
 	}
 
 	return userResponse, nil
@@ -92,6 +88,7 @@ func (u *UserService) LoginUser(email string, password string) (*dto.UserRespons
 		Email:   user.Email,
 		Address: user.Address,
 		ID:      user.ID,
+		Role:    user.Role,
 	}
 
 	return existingUser, nil
