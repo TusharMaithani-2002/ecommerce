@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/my_ecommerce/internal/middleware"
 	"github.com/my_ecommerce/services"
 )
 
@@ -17,7 +18,7 @@ func (p *ProductController) InitProductController(router *gin.Engine, productSer
 	productRouter := router.Group("/product")
 
 	productRouter.GET("/:id", p.getProduct())
-	productRouter.POST("",p.createProduct())
+	productRouter.POST("",middleware.VerifyUser(),p.createProduct())
 	p.productServices = productServices
 }
 
@@ -67,6 +68,17 @@ func (p *ProductController) createProduct() gin.HandlerFunc {
 		if err := c.BindJSON(&productBody); err != nil {
 			c.JSON(http.StatusBadRequest,gin.H{		
 				"error":err.Error(),
+			})
+			return
+		}
+
+		// checking whether email in cookie and seller email is same
+		cookieId,ok := c.Get("cookieId")
+		userId := cookieId.(int)
+
+		if !ok || userId != productBody.SellerID {
+			c.JSON(http.StatusUnauthorized,gin.H{
+				"error":"cookie is invalid",
 			})
 			return
 		}

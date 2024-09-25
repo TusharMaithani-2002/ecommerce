@@ -55,7 +55,7 @@ func (p *ProductService) GetProduct(id int) (*dto.ProductReponse, error) {
 	return productResponse, nil
 }
 
-func (p *ProductService) CreateProduct(name, description, category string, sellerId, quantity int, price float64, images []string) (*dto.ProductReponse, error) {
+func (p *ProductService) CreateProduct(name, description, category string, sellerId, quantity int, price float64, images []string) (*dto.ProductNoSellerResponse, error) {
 
 	imagesJSON, _ := json.Marshal(images)
 	product := &models.Product{
@@ -69,22 +69,15 @@ func (p *ProductService) CreateProduct(name, description, category string, selle
 		CreatedAt:   time.Now(),
 	}
 
-	if err := p.db.Create(&product).Preload("Seller").Error; err != nil {
+	if err := p.db.Create(&product).Error; err != nil {
 		return nil, err
 	}
 
-	sellerResponse := dto.UserResponse{
-		Name:    product.Seller.Name,
-		Email:   product.Seller.Email,
-		ID:      product.Seller.ID,
-		Address: product.Seller.Address,
-		Role:    product.Seller.Role,
-	}
 
 	var imagesArray []string
 	json.Unmarshal(product.Images, &imagesArray)
 
-	productReponse := &dto.ProductReponse{
+	productReponse := &dto.ProductNoSellerResponse{
 		ID:          product.ID,
 		Name:        product.Name,
 		Description: product.Description,
@@ -94,7 +87,6 @@ func (p *ProductService) CreateProduct(name, description, category string, selle
 		Price:       product.Price,
 		Images:      imagesArray,
 		CreatedAt:   product.CreatedAt,
-		Seller:      sellerResponse,
 	}
 
 	return productReponse, nil

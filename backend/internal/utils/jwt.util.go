@@ -8,12 +8,13 @@ import (
 
 var jwtSecret = []byte("secret_key")
 
-func GenerateJWT(email, role string) (string, error) {
+func GenerateJWT(email, role string, id int) (string, error) {
 
 	claims := &jwt.MapClaims{
 		"ExpiresAt": time.Now().Add(time.Hour * 72).Unix(),
 		"Email":     email,
 		"Role":      role,
+		"ID":        id,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -22,9 +23,10 @@ func GenerateJWT(email, role string) (string, error) {
 }
 
 type JWTDecode struct {
-	ExpiresAt interface{}
-	Email     interface{}
-	Role      interface{}
+	ExpiresAt int64
+	Email     string
+	Role      string
+	ID        int
 }
 
 func DecodeJWT(tokenString string) (*JWTDecode, error) {
@@ -44,11 +46,16 @@ func DecodeJWT(tokenString string) (*JWTDecode, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	decodedJWT := &JWTDecode{}
 	if !ok {
-		return decodedJWT, fmt.Errorf("Error while taking claims in jwt")
+		return decodedJWT, fmt.Errorf("error while taking claims in jwt")
 	}
-	decodedJWT.Email = claims["Email"]
-	decodedJWT.ExpiresAt = claims["ExpiresAt"]
-	decodedJWT.Role = claims["Role"]
+	decodedJWT.Email = claims["Email"].(string)
+	decodedJWT.ExpiresAt = int64(claims["ExpiresAt"].(float64))
+	decodedJWT.Role = claims["Role"].(string)
+	decodedId, ok := claims["ID"].(float64)
+	if !ok {
+		return decodedJWT, fmt.Errorf("id could not be exracted")
+	}
+	decodedJWT.ID = int(decodedId)
 
 	return decodedJWT, nil
 

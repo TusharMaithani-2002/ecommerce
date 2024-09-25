@@ -79,7 +79,7 @@ func (u *UserController) registerUser() gin.HandlerFunc {
 			return
 		}
 
-		jwtToken, err := utils.GenerateJWT(user.Email, user.Role)
+		jwtToken, err := utils.GenerateJWT(user.Email, user.Role, user.ID)
 
 		if err != nil {
 			c.JSON(http.StatusMethodNotAllowed, gin.H{
@@ -122,7 +122,7 @@ func (u *UserController) loginUser() gin.HandlerFunc {
 			return
 		}
 
-		jwtToken, err := utils.GenerateJWT(loggedInUser.Email, loggedInUser.Role)
+		jwtToken, err := utils.GenerateJWT(loggedInUser.Email, loggedInUser.Role, loggedInUser.ID)
 
 		if err != nil {
 			c.JSON(http.StatusMethodNotAllowed, gin.H{

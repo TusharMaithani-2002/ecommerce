@@ -26,3 +26,16 @@ type ProductReponse struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
+
+type ProductNoSellerResponse struct {
+	ID          int
+	Name        string
+	Price       float64
+	Category    string
+	Images      []string
+	Quantity    int
+	SellerId    int
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
