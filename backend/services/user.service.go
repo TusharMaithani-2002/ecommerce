@@ -93,3 +93,14 @@ func (u *UserService) LoginUser(email string, password string) (*dto.UserRespons
 
 	return existingUser, nil
 }
+
+func (u *UserService) DeleteUser(id int) error {
+
+	if err := u.db.Where("id = ?",id).Delete(models.User{}).Error; err != nil {
+		return err
+	}
+
+	// user := u.db.Where("id = ?",id)
+	
+	return nil
+}

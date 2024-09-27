@@ -14,7 +14,7 @@ type Product struct {
 	Quantity    int            `gorm:"not null"`
 	Category    string         `gorm:"size:100"`
 	SellerID    int            `gorm:"not null"`
-	Seller      User           `gorm:"foreignKey:SellerID"`
+	Seller      User           `gorm:"foreignKey:SellerID;references:ID;onDelete:CASCADE"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

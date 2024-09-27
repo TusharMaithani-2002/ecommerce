@@ -20,6 +20,8 @@ func (u *UserController) InitUserController(router *gin.Engine, userService serv
 	userRouter.GET("/:id", u.getUserById())
 	userRouter.POST("/register", u.registerUser())
 	userRouter.POST("/login", u.loginUser())
+	userRouter.DELETE("/delete/:id",u.deleteUser())
+	userRouter.POST("/logout",u.logOut())
 	u.userSevices = userService
 }
 
@@ -138,5 +140,42 @@ func (u *UserController) loginUser() gin.HandlerFunc {
 			"data": loggedInUser,
 		})
 
+	}
+}
+
+func (u *UserController) deleteUser() gin.HandlerFunc {
+
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		numId,err := strconv.Atoi(id)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":"userId not valid",
+			})
+			return
+		}
+
+		if err := u.userSevices.DeleteUser(numId); err != nil {
+			c.JSON(http.StatusExpectationFailed,gin.H{
+				"error":err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message":"user deleted successfully",
+		})
+
+	}
+}
+
+func (u* UserController) logOut() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.SetCookie("go_ecommerce", "", -1, "/", "localhost", false, true)
+
+		c.JSON(http.StatusOK,gin.H{
+			"message":"user logged out successfully",
+		})
 	}
 }

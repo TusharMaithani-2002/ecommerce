@@ -7,4 +7,5 @@ type User struct {
 	Password string
 	Address  string
 	Role     string
+	Products []Product `gorm:"foreignKey:SellerID"`
 }
