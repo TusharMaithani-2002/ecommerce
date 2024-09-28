@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/my_ecommerce/internal/dto"
 	"github.com/my_ecommerce/internal/middleware"
 	"github.com/my_ecommerce/services"
+	"gorm.io/datatypes"
 )
 
 type ProductController struct {
@@ -19,6 +22,8 @@ func (p *ProductController) InitProductController(router *gin.Engine, productSer
 
 	productRouter.GET("/:id", p.getProduct())
 	productRouter.POST("",middleware.VerifyUser(),p.createProduct())
+	productRouter.DELETE("/delete/:id",middleware.VerifyUser(),p.deleteProduct())
+	productRouter.PATCH("/update/:id",middleware.VerifyUser(),p.updateProduct())
 	p.productServices = productServices
 }
 
@@ -95,5 +100,139 @@ func (p *ProductController) createProduct() gin.HandlerFunc {
 		c.JSON(http.StatusCreated, gin.H{
 			"data": product,
 		})
+	}
+}
+
+func (p *ProductController) deleteProduct() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		id := c.Param("id")
+		numId, err := strconv.Atoi(id)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":"product Id not valid number",
+			})
+			return
+		}
+
+		product, err := p.productServices.GetProduct(numId)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":err.Error(),
+				"message":"failed to get product with current Id",
+			})
+			return
+		}
+		// first we have to check whether the deleting request is made by the seller or not
+		role := c.MustGet("role").(string)
+
+		if role != "admin" {
+			// you are not the admin then you must be the user to delete the product
+			cookieId := c.MustGet("cookieId").(int)
+			if product.SellerId != cookieId {
+				c.JSON(http.StatusForbidden,gin.H{
+					"error":"you are not authorized for the deletion of the product",
+				})
+				return
+			}
+		}
+
+
+		if err := p.productServices.DeleteProduct(numId); err != nil {
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK,gin.H{
+			"message":fmt.Sprintf("product with id = %s deleted",id),
+		})
+	}
+}
+
+func (p *ProductController) updateProduct() gin.HandlerFunc {
+
+	type UpdateProductRequest struct {
+		Name        *string   `json:"name,omitempty" form:"name,omitempty"`
+		Price       *float64   `json:"price,omitempty" form:"price,omitempty"`
+		Description *string   `json:"description,omitempty" form:"description,omitempty"`
+		Images       *datatypes.JSON `json:"images,omitempty" form:"images,omitempty"`
+		Quantity    *int      `json:"quantity,omitempty" form:"quantity,omitempty"`
+		Category    *string   `json:"category,omitempty" form:"category,omitempty"`
+	}
+
+
+
+	return func(c *gin.Context) {
+
+		id := c.Param("id")
+		numId, err := strconv.Atoi(id)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":"product Id not valid number",
+			})
+			return
+		}
+
+		product, err := p.productServices.GetProduct(numId)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest,gin.H{
+				"error":err.Error(),
+				"message":"failed to get product with current Id",
+			})
+			return
+		}
+
+		cookieId,ok := c.Get("cookieId")
+		userId := cookieId.(int)
+		
+		if !ok {
+			c.JSON(http.StatusUnauthorized,gin.H{
+				"error":"cookie is invalid",
+			})
+			return
+		}
+
+		if userId != product.SellerId {
+			c.JSON(http.StatusUnauthorized,gin.H{
+				"error":"you are not authorized to the product",
+			})
+			return
+		}
+
+		var request UpdateProductRequest
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest,gin.H{		
+				"error":err.Error(),
+			})
+			return
+		}
+		var updateRequest dto.UpdatedProduct
+		updateRequest.Name = request.Name
+		updateRequest.Category = request.Category
+		updateRequest.Description = request.Description
+		updateRequest.Images = request.Images
+		updateRequest.Price = request.Price
+		updateRequest.Quantity = request.Quantity
+
+		updatedProduct, err := p.productServices.UpdateProduct(numId, updateRequest)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusAccepted, gin.H{
+			"data": updatedProduct,
+			"messaage":"product updated successfully",
+		})
+
 	}
 }

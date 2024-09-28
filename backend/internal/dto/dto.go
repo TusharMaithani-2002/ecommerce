@@ -2,6 +2,8 @@ package dto
 
 import (
 	"time"
+
+	"gorm.io/datatypes"
 )
 
 // while sending user at
@@ -18,7 +20,7 @@ type ProductReponse struct {
 	Name        string
 	Price       float64
 	Category    string
-	Images      []string
+	Images      datatypes.JSON
 	Quantity    int
 	SellerId    int
 	Description string
@@ -32,10 +34,19 @@ type ProductNoSellerResponse struct {
 	Name        string
 	Price       float64
 	Category    string
-	Images      []string
+	Images      datatypes.JSON
 	Quantity    int
 	SellerId    int
 	Description string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type UpdatedProduct struct {
+	Name        *string   
+	Price       *float64   
+	Description *string   
+	Images       *datatypes.JSON 
+	Quantity    *int      
+	Category    *string 
 }

@@ -41,7 +41,25 @@ func VerifyUser() gin.HandlerFunc {
 		}
 
 		c.Set("cookieId",decoded.ID)
+		c.Set("role",decoded.Role)
 		c.Next()
 
 	}
+}
+
+/*
+checking whether user is seller are same
+*/
+func verifyWriter() gin.HandlerFunc {
+
+	return func(c *gin.Context) {
+		
+	}
+}
+
+/*
+checking whether user is admin or writer
+*/
+func verrifyPrivilege() gin.HandlerFunc {
+	return func(c *gin.Context) {}
 }
