@@ -8,11 +8,12 @@ import (
 
 // while sending user at
 type UserResponse struct {
-	ID      int
-	Email   string
-	Address string
-	Name    string
-	Role    string
+	ID          int
+	Email       string
+	Address     string
+	Name        string
+	Role        string
+	PhoneNumber string
 }
 
 type ProductReponse struct {
@@ -43,10 +44,17 @@ type ProductNoSellerResponse struct {
 }
 
 type UpdatedProduct struct {
-	Name        *string   
-	Price       *float64   
-	Description *string   
-	Images       *datatypes.JSON 
-	Quantity    *int      
-	Category    *string 
+	Name        *string
+	Price       *float64
+	Description *string
+	Images      *datatypes.JSON
+	Quantity    *int
+	Category    *string
+}
+
+type UpdatedUser struct {
+	Name        *string
+	Address     *string
+	Role        *string
+	PhoneNumber *string
 }

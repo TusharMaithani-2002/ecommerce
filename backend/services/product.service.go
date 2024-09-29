@@ -74,7 +74,6 @@ func (p *ProductService) CreateProduct(name, description, category string, selle
 		return nil, err
 	}
 
-
 	var imagesArray datatypes.JSON
 	json.Unmarshal(product.Images, &imagesArray)
 
@@ -94,20 +93,12 @@ func (p *ProductService) CreateProduct(name, description, category string, selle
 }
 
 func (p *ProductService) DeleteProduct(id int) error {
-	if err := p.db.Where("id = ?",id).Delete(&models.Product{}).Error; err != nil {
+	if err := p.db.Where("id = ?", id).Delete(&models.Product{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-type UpdateProductRequest struct {
-	Name        *string   
-	Price       *float64   
-	Description *string   
-	Images       *datatypes.JSON 
-	Quantity    *int      
-	Category    *string 
-}
 func (p *ProductService) UpdateProduct(id int, request dto.UpdatedProduct) (*dto.ProductNoSellerResponse, error) {
 
 	var product models.Product
@@ -155,5 +146,3 @@ func (p *ProductService) UpdateProduct(id int, request dto.UpdatedProduct) (*dto
 
 	return productReponse, nil
 }
-
-
