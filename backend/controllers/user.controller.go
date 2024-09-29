@@ -206,22 +206,18 @@ func (u *UserController) updateUser() gin.HandlerFunc {
 			return
 		}
 
-		cookieId, ok := c.Get("cookieId")
-		userId := cookieId.(int)
+		cookieId, ok1 := c.Get("cookieId")
+		cookieRole, ok2 := c.Get("role")
 
-		if userId != numId {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "you are not authorized to the update this user",
-			})
-			return
-		}
-
-		if !ok {
+		if !ok1 && !ok2 {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "cookie is invalid",
 			})
 			return
 		}
+
+		userId := cookieId.(int)
+		userRole := cookieRole.(string)
 
 		var userRequest UpdateUserRequest
 		if err := c.BindJSON(&userRequest); err != nil {
@@ -229,6 +225,24 @@ func (u *UserController) updateUser() gin.HandlerFunc {
 				"error": err.Error(),
 			})
 			return
+		}
+
+		if userId != numId && userRole != "admin" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "you are not authorized to the update this user",
+			})
+			return
+		}
+
+
+		// additional check for role as role can only be changed by admin
+		if userRequest.Role != nil {
+			if userRole != "admin" {
+				c.JSON(http.StatusUnauthorized,gin.H{
+					"error":"you are unauthorized for making role change",
+				})
+				return
+			}
 		}
 
 		request := dto.UpdatedUser{
