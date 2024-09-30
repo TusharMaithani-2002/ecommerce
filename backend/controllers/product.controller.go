@@ -21,10 +21,40 @@ func (p *ProductController) InitProductController(router *gin.Engine, productSer
 	productRouter := router.Group("/product")
 
 	productRouter.GET("/:id", p.getProduct())
+	productRouter.GET("/all/:page",p.getAllProducts())
 	productRouter.POST("",middleware.VerifyUser(),p.createProduct())
 	productRouter.DELETE("/delete/:id",middleware.VerifyUser(),p.deleteProduct())
 	productRouter.PATCH("/update/:id",middleware.VerifyUser(),p.updateProduct())
 	p.productServices = productServices
+}
+
+func (p *ProductController) getAllProducts() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		page := c.Param("page")
+		pageNumber, err := strconv.Atoi(page)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":err,
+				"message":"Page number not valid",
+			})
+			return
+		}
+
+		products, err := p.productServices.GetAllProducts(pageNumber)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":err,
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"data":products,
+		})
+	}
 }
 
 func (p *ProductController) getProduct() gin.HandlerFunc {

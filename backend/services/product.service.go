@@ -7,6 +7,8 @@ import (
 
 	"github.com/my_ecommerce/internal/dto"
 	"github.com/my_ecommerce/internal/models"
+	"github.com/my_ecommerce/internal/pagination"
+	"github.com/my_ecommerce/internal/utils"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -20,6 +22,38 @@ func (p *ProductService) InitProductService(database *gorm.DB) {
 	if err := p.db.AutoMigrate(&models.Product{}); err != nil {
 		log.Fatal("Failed to auto migrate product")
 	}
+}
+
+func (p *ProductService) GetAllProducts(pageNumber int) (*dto.PaginatedProductsResponse, error) {
+
+	const pageSize = 15 // max products shown on a single page
+	pagination := pagination.NewPaginate(pageSize, pageNumber).PaginatedResult
+	
+	var products []models.Product
+	var totalProducts int64
+
+	err := p.db.Model(&models.Product{}).Count(&totalProducts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	nextPageAvailable := totalProducts - int64(pageSize * pageNumber) >= 1
+
+	err = p.db.Scopes(pagination).Find(&products).Error
+	if err != nil {
+		return nil, err
+	}
+
+	productDTOS := utils.ConvertProductsToDTOs(products)
+
+	paginatedResponse := &dto.PaginatedProductsResponse{
+		Products: productDTOS,
+		CurrentPage: pageNumber,
+		PageSize: pageSize,
+		NextPage: nextPageAvailable,
+	}
+
+	return paginatedResponse, nil
 }
 
 func (p *ProductService) GetProduct(id int) (*dto.ProductReponse, error) {

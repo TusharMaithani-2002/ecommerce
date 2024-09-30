@@ -1,9 +1,8 @@
 package dto
 
 import (
-	"time"
-
 	"gorm.io/datatypes"
+	"time"
 )
 
 // while sending user at
@@ -57,4 +56,11 @@ type UpdatedUser struct {
 	Address     *string
 	Role        *string
 	PhoneNumber *string
+}
+
+type PaginatedProductsResponse struct {
+	Products    []ProductNoSellerResponse
+	CurrentPage int
+	PageSize    int
+	NextPage    bool
 }
