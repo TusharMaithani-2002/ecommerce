@@ -25,6 +25,7 @@ func (p *ProductController) InitProductController(router *gin.Engine, productSer
 	productRouter.POST("",middleware.VerifyUser(),p.createProduct())
 	productRouter.DELETE("/delete/:id",middleware.VerifyUser(),p.deleteProduct())
 	productRouter.PATCH("/update/:id",middleware.VerifyUser(),p.updateProduct())
+	productRouter.GET("/filter",p.getFilteredProducts())
 	p.productServices = productServices
 }
 
@@ -264,5 +265,72 @@ func (p *ProductController) updateProduct() gin.HandlerFunc {
 			"messaage":"product updated successfully",
 		})
 
+	}
+}
+
+func (p *ProductController) getFilteredProducts() gin.HandlerFunc {
+
+	return func(c *gin.Context) {
+		category := c.Query("category")
+		name := c.Query("name")
+		description := c.Query("description")
+		minPriceStr := c.Query("minPrice")
+		maxPriceStr := c.Query("maxPrice")
+		pageNumberStr := c.Query("pageNumber")
+		sorting := c.Query("sorting")
+
+		var minPrice* float64 = nil
+		var maxPrice* float64 = nil
+		var pageNumber int = 1
+
+		// applying checks for price and page number
+
+		if minPriceStr != "" {
+			min, err := strconv.ParseFloat(minPriceStr, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error":err.Error(),
+				})
+				return
+			}
+
+			minPrice = &min
+		}
+
+		if maxPriceStr != "" {
+			max, err := strconv.ParseFloat(maxPriceStr, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error":err.Error(),
+				})
+				return
+			}
+			maxPrice = &max
+		}
+
+		if pageNumberStr != "" {
+			page, err := strconv.Atoi(pageNumberStr)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error":err.Error(),
+				})
+				return
+			}
+			pageNumber = page
+		}
+
+
+		products, err := p.productServices.GetFilteredProducts(category, name, description, sorting, minPrice, maxPrice,pageNumber)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"data":products,
+		})
 	}
 }

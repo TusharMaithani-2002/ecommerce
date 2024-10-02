@@ -180,3 +180,60 @@ func (p *ProductService) UpdateProduct(id int, request dto.UpdatedProduct) (*dto
 
 	return productReponse, nil
 }
+
+func (p *ProductService) GetFilteredProducts(category, name, description, sorting string, minPrice, maxPrice *float64, pageNumber int) (*dto.PaginatedProductsResponse, error) {
+
+	const pageSize = 15 // max products shown on a single page
+	pagination := pagination.NewPaginate(pageSize, pageNumber).PaginatedResult
+	
+	var products []models.Product
+
+	query := p.db.Model(&models.Product{})
+
+
+    if category != "" {
+        query = query.Where("category ILIKE ?", "%"+category+"%")
+	}
+    if name != "" {
+        query = query.Where("name ILIKE ?", "%"+name+"%")
+    }
+    if description != "" {
+		query = query.Where("to_tsvector(description) @@ plainto_tsquery(?)", description)
+    }
+    if minPrice != nil && maxPrice != nil {
+        query = query.Where("price BETWEEN ? AND ?", minPrice, maxPrice)
+    } else if minPrice != nil {
+		query = query.Where("price >= ?",*minPrice)
+	} else if maxPrice != nil {
+		query = query.Where("price <= ?",*maxPrice)
+	}
+
+	if sorting == "asc" {
+		query = query.Order("price asc")
+	} else if sorting == "desc" {
+		query = query.Order("price desc")
+	}
+
+
+	var totalProducts int64
+	if err := query.Count(&totalProducts).Error; err != nil {
+		return nil, err
+	}
+
+	if err := query.Scopes(pagination).Find(&products).Error; err != nil {
+		return nil, err
+	}
+
+	nextPageAvailable := totalProducts - int64(pageSize * pageNumber) >= 1
+	productDTOS := utils.ConvertProductsToDTOs(products)
+
+	paginatedResponse := &dto.PaginatedProductsResponse{
+		Products: productDTOS,
+		CurrentPage: pageNumber,
+		PageSize: pageSize,
+		NextPage: nextPageAvailable,
+	}
+
+	return paginatedResponse, nil
+
+}
