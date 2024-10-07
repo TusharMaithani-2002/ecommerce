@@ -28,7 +28,7 @@ func (p *ProductService) GetAllProducts(pageNumber int) (*dto.PaginatedProductsR
 
 	const pageSize = 15 // max products shown on a single page
 	pagination := pagination.NewPaginate(pageSize, pageNumber).PaginatedResult
-	
+
 	var products []models.Product
 	var totalProducts int64
 
@@ -37,7 +37,7 @@ func (p *ProductService) GetAllProducts(pageNumber int) (*dto.PaginatedProductsR
 		return nil, err
 	}
 
-	nextPageAvailable := totalProducts - int64(pageSize * pageNumber) >= 1
+	nextPageAvailable := totalProducts-int64(pageSize*pageNumber) >= 1
 
 	err = p.db.Scopes(pagination).Find(&products).Error
 	if err != nil {
@@ -47,10 +47,10 @@ func (p *ProductService) GetAllProducts(pageNumber int) (*dto.PaginatedProductsR
 	productDTOS := utils.ConvertProductsToDTOs(products)
 
 	paginatedResponse := &dto.PaginatedProductsResponse{
-		Products: productDTOS,
+		Products:    productDTOS,
 		CurrentPage: pageNumber,
-		PageSize: pageSize,
-		NextPage: nextPageAvailable,
+		PageSize:    pageSize,
+		NextPage:    nextPageAvailable,
 	}
 
 	return paginatedResponse, nil
@@ -85,6 +85,8 @@ func (p *ProductService) GetProduct(id int) (*dto.ProductReponse, error) {
 		Images:      imagesArray,
 		CreatedAt:   product.CreatedAt,
 		Seller:      sellerResponse,
+		Rating:      product.Rating,
+		RatingCount: product.RatingCount,
 	}
 
 	return productResponse, nil
@@ -160,6 +162,8 @@ func (p *ProductService) UpdateProduct(id int, request dto.UpdatedProduct) (*dto
 		product.Price = *request.Price
 	}
 
+	product.UpdatedAt = time.Now()
+
 	err := p.db.Save(&product).Error
 
 	if err != nil {
@@ -175,7 +179,7 @@ func (p *ProductService) UpdateProduct(id int, request dto.UpdatedProduct) (*dto
 		Quantity:    product.Quantity,
 		Price:       product.Price,
 		Images:      product.Images,
-		CreatedAt:   product.CreatedAt,
+		UpdatedAt:   product.UpdatedAt,
 	}
 
 	return productReponse, nil
@@ -185,27 +189,26 @@ func (p *ProductService) GetFilteredProducts(category, name, description, sortin
 
 	const pageSize = 15 // max products shown on a single page
 	pagination := pagination.NewPaginate(pageSize, pageNumber).PaginatedResult
-	
+
 	var products []models.Product
 
 	query := p.db.Model(&models.Product{})
 
-
-    if category != "" {
-        query = query.Where("category ILIKE ?", "%"+category+"%")
+	if category != "" {
+		query = query.Where("category ILIKE ?", "%"+category+"%")
 	}
-    if name != "" {
-        query = query.Where("name ILIKE ?", "%"+name+"%")
-    }
-    if description != "" {
+	if name != "" {
+		query = query.Where("name ILIKE ?", "%"+name+"%")
+	}
+	if description != "" {
 		query = query.Where("to_tsvector(description) @@ plainto_tsquery(?)", description)
-    }
-    if minPrice != nil && maxPrice != nil {
-        query = query.Where("price BETWEEN ? AND ?", minPrice, maxPrice)
-    } else if minPrice != nil {
-		query = query.Where("price >= ?",*minPrice)
+	}
+	if minPrice != nil && maxPrice != nil {
+		query = query.Where("price BETWEEN ? AND ?", minPrice, maxPrice)
+	} else if minPrice != nil {
+		query = query.Where("price >= ?", *minPrice)
 	} else if maxPrice != nil {
-		query = query.Where("price <= ?",*maxPrice)
+		query = query.Where("price <= ?", *maxPrice)
 	}
 
 	if sorting == "asc" {
@@ -213,7 +216,6 @@ func (p *ProductService) GetFilteredProducts(category, name, description, sortin
 	} else if sorting == "desc" {
 		query = query.Order("price desc")
 	}
-
 
 	var totalProducts int64
 	if err := query.Count(&totalProducts).Error; err != nil {
@@ -224,14 +226,14 @@ func (p *ProductService) GetFilteredProducts(category, name, description, sortin
 		return nil, err
 	}
 
-	nextPageAvailable := totalProducts - int64(pageSize * pageNumber) >= 1
+	nextPageAvailable := totalProducts-int64(pageSize*pageNumber) >= 1
 	productDTOS := utils.ConvertProductsToDTOs(products)
 
 	paginatedResponse := &dto.PaginatedProductsResponse{
-		Products: productDTOS,
+		Products:    productDTOS,
 		CurrentPage: pageNumber,
-		PageSize: pageSize,
-		NextPage: nextPageAvailable,
+		PageSize:    pageSize,
+		NextPage:    nextPageAvailable,
 	}
 
 	return paginatedResponse, nil

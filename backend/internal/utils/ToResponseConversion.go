@@ -7,14 +7,16 @@ import (
 
 func ConvertToProductResponseDTO(product models.Product) dto.ProductNoSellerResponse {
 	return dto.ProductNoSellerResponse{
-		ID: product.ID,
-		Name: product.Name,
-		Category: product.Category,
+		ID:          product.ID,
+		Name:        product.Name,
+		Category:    product.Category,
 		Description: product.Description,
-		Images: product.Images,
-		Quantity: product.Quantity,
-		SellerId: product.SellerID,
-		Price: product.Price,
+		Images:      product.Images,
+		Quantity:    product.Quantity,
+		SellerId:    product.SellerID,
+		Price:       product.Price,
+		Rating:      product.Rating,
+		RatingCount: product.RatingCount,
 	}
 }
 

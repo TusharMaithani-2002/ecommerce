@@ -32,6 +32,12 @@ func main() {
 
 	productServices.InitProductService(db)
 	productController.InitProductController(r,productServices)
+
+	ratingServices := services.RatingService{}
+	ratingController := controllers.RatingController{}
+
+	ratingServices.InitRatingService(db)
+	ratingController.InitRatingController(r, ratingServices)
 	
 	r.Run(":8000")
 }

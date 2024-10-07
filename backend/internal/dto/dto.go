@@ -27,6 +27,8 @@ type ProductReponse struct {
 	Seller      UserResponse   `json:"seller"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
+	Rating      float32        `json:"rating"`
+	RatingCount int            `json:"ratingCount"`
 }
 
 type ProductNoSellerResponse struct {
@@ -40,6 +42,8 @@ type ProductNoSellerResponse struct {
 	Description string         `json:"description"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
+	Rating      float32        `json:"rating"`
+	RatingCount int            `json:"ratingCount"`
 }
 
 type UpdatedProduct struct {
@@ -49,6 +53,8 @@ type UpdatedProduct struct {
 	Images      *datatypes.JSON `json:"images"`
 	Quantity    *int            `json:"quantity"`
 	Category    *string         `json:"category"`
+	Rating      *float32        `json:"rating"`
+	RatingCount *int            `json:"ratingCount"`
 }
 
 type UpdatedUser struct {
@@ -63,4 +69,10 @@ type PaginatedProductsResponse struct {
 	CurrentPage int                       `json:"currentPage"`
 	PageSize    int                       `json:"pageSize"`
 	NextPage    bool                      `json:"nextPage"`
+}
+
+type RatingResponse struct {
+	UserID    int     `json:"userId"`
+	ProductID int     `json:"productId"`
+	Value     float32 `json:"value"`
 }
