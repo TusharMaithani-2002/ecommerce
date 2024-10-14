@@ -76,3 +76,11 @@ type RatingResponse struct {
 	ProductID int     `json:"productId"`
 	Value     float32 `json:"value"`
 }
+
+type CommentResponse struct {
+	ID int `json:"id"`
+	UserID int `json:"userId"`
+	ProductID int `json:"productId"`
+	Body  string `json:"body"`
+	Likes uint `json:"Likes"`
+}

@@ -38,6 +38,12 @@ func main() {
 
 	ratingServices.InitRatingService(db)
 	ratingController.InitRatingController(r, ratingServices)
+
+	commentServies := services.CommentServices{}
+	commentController := controllers.CommentController{}
+
+	commentServies.InitCommentService(db)
+	commentController.InitCommentController(r, &commentServies)
 	
 	r.Run(":8000")
 }
