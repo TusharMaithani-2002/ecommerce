@@ -78,9 +78,34 @@ type RatingResponse struct {
 }
 
 type CommentResponse struct {
-	ID int `json:"id"`
-	UserID int `json:"userId"`
+	ID        int    `json:"id"`
+	UserID    int    `json:"userId"`
+	ProductID int    `json:"productId"`
+	Body      string `json:"body"`
+	Likes     uint   `json:"Likes"`
+}
+
+type CartItemResponse struct {
 	ProductID int `json:"productId"`
-	Body  string `json:"body"`
-	Likes uint `json:"Likes"`
+	Quantity  int `json:"quantity"`
+}
+
+type CartResponse struct {
+	ID       int                `json:"id"`
+	UserID   int                `json:"userId"`
+	Products []CartItemResponse `json:"cartItems"`
+}
+
+type CartResponsePopulated struct {
+	ID       int                   `json:"id"`
+	UserID   int                   `json:"userId"`
+	Products []CartProductResponse `json:"cartItems"`
+}
+
+type CartProductResponse struct {
+	ID       int     `json:"id"`
+	Name     string  `json:"name"`
+	Price    float64 `json:"price"`
+	Image    string  `json:"image"`
+	Quantity int     `json:"quantity"`
 }

@@ -25,13 +25,13 @@ func main() {
 	userController := controllers.UserController{}
 
 	userServices.InitUserService(db)
-	userController.InitUserController(r,userServices)
+	userController.InitUserController(r, userServices)
 
 	productServices := services.ProductService{}
 	productController := controllers.ProductController{}
 
 	productServices.InitProductService(db)
-	productController.InitProductController(r,productServices)
+	productController.InitProductController(r, productServices)
 
 	ratingServices := services.RatingService{}
 	ratingController := controllers.RatingController{}
@@ -44,6 +44,12 @@ func main() {
 
 	commentServies.InitCommentService(db)
 	commentController.InitCommentController(r, &commentServies)
-	
+
+	cartServices := services.CartServices{}
+	cartController := controllers.CartController{}
+
+	cartServices.InitCartServices(db)
+	cartController.InitCartController(r, &cartServices)
+
 	r.Run(":8000")
 }
